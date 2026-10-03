@@ -24,6 +24,19 @@ input{width:100%;padding:12px 13px;color:var(--t);background:#090f19;border:1px 
 .codebox{margin-top:18px;padding:18px;border:1px dashed #54617b;border-radius:16px;background:#0b111e;text-align:center}.codetitle{font-size:12px;letter-spacing:2px;color:var(--m);font-weight:900}.roomcode{font-size:52px;letter-spacing:8px;font-weight:1000;margin:6px 0}.share{font-size:13px;color:#ccd4e3;margin-bottom:12px}.check{display:flex;gap:8px;align-items:flex-start;margin-top:12px;color:#cbd4e4;font-size:13px}.check input{width:auto;margin-top:3px}
 .host{margin-top:16px}.hostgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.hostgame{padding:14px;border:1px solid var(--l);border-radius:13px;background:#0b111d}.hostgame h3{margin:0 0 6px}.hostgame p{margin:0 0 10px;color:var(--m);font-size:12px;line-height:1.4}
 .mini-title{font-size:28px;font-weight:1000;margin:12px 0}.bigaction{padding:18px 30px;font-size:24px;font-weight:1000;border-radius:14px;background:var(--a);color:#fff}.timer{font-size:48px;font-weight:1000;margin:14px 0}.memoryseq{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;font-size:42px;min-height:62px;margin:15px 0}.emojirow{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}.emoji{font-size:25px;padding:9px 11px;border-radius:11px;background:#202a40;color:#fff}.answer{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;min-height:48px;margin:10px 0}.slot{min-width:45px;padding:8px 10px;border:1px solid var(--l);border-radius:10px;background:#090f19;font-size:24px}.intrudergrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;max-width:480px;margin:15px auto}.tile{aspect-ratio:1;border-radius:14px;background:#202a40;color:#fff;font-size:34px;border:1px solid var(--l)}.tile:hover{transform:translateY(-2px)}
+.roomBanner{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:16px;padding:13px 15px;border:1px solid #35405a;border-radius:14px;background:linear-gradient(135deg,#0d1422,#121a2b)}
+.roomMiniCode{font-size:23px;letter-spacing:5px;font-weight:1000;color:var(--gold)}
+.career{background:rgba(12,18,30,.98);border:1px solid #34405a;border-radius:22px;padding:18px;box-shadow:0 20px 70px rgba(0,0,0,.28)}
+.careerTop{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start}.careerTitle{font-size:30px;font-weight:1000}.careerSub{color:var(--m);margin-top:5px}.careerGrid{display:grid;grid-template-columns:1.3fr .8fr;gap:15px;margin-top:15px}
+.footballStage{position:relative;border:1px solid #34405a;border-radius:18px;overflow:hidden;background:#07101a}.footballStage canvas{display:block;width:100%;height:auto;background:#0c5f35}
+.footballHUD{position:absolute;left:12px;top:12px;right:12px;display:flex;justify-content:space-between;gap:8px;pointer-events:none;flex-wrap:wrap}.fhud{padding:8px 11px;border-radius:999px;background:rgba(5,10,17,.78);border:1px solid rgba(255,255,255,.16);font-weight:900}
+.careerStats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.careerStat{padding:10px;border:1px solid #303c55;border-radius:12px;background:#0a111d}.careerStat small{display:block;color:var(--m)}.careerStat b{font-size:20px}
+.careerPanel{padding:13px;border:1px solid #303c55;border-radius:14px;background:#0a111d;margin-top:12px}.careerPanel h3{margin:0 0 8px}.careerActions{display:flex;flex-wrap:wrap;gap:8px}.careerLog{max-height:190px;overflow:auto;font-size:13px;color:#d6deee}.careerLog div{padding:7px 0;border-bottom:1px solid #202a3b}
+.offerGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.offer{padding:11px;border:1px solid #35405a;border-radius:12px;background:#0c1421}.offer strong{display:block}.offer span{display:block;color:var(--m);font-size:12px;margin-top:4px}.offer button{margin-top:8px}
+.quiz{display:grid;gap:8px}.quiz button{text-align:left;padding:10px 12px;border-radius:10px;background:#18233a;color:#fff;border:1px solid #303c55}.quiz button:hover{background:#233251}
+.posRow{display:flex;gap:8px;flex-wrap:wrap}.pos{padding:9px 12px;border-radius:10px;background:#18233a;color:#fff;border:1px solid #303c55}.pos.active{background:var(--a)}
+.backBtn{margin-top:12px}
+@media(max-width:900px){.careerGrid{grid-template-columns:1fr}.offerGrid{grid-template-columns:1fr}.careerStats{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:900px){.grid{grid-template-columns:1fr}.hostgrid{grid-template-columns:1fr}.keys{grid-template-columns:repeat(7,1fr)}.word{font-size:34px;letter-spacing:7px}.roomcode{font-size:40px}}
 </style>
 </head>
@@ -40,10 +53,12 @@ input{width:100%;padding:12px 13px;color:var(--t);background:#090f19;border:1px 
 <label class="check"><input id="shareLocation" type="checkbox"><span>Compartir ubicación aproximada (ciudad/provincia/país). Es opcional y no muestra tu IP.</span></label>
 <div id="created" class="codebox hidden"><div class="codetitle">CÓDIGO DE TU SALA</div><div id="code" class="roomcode">--------</div><div class="share">Pasalo a tus amigos.</div><button id="copy" class="btn gold">📋 COPIAR CÓDIGO</button></div>
 <div class="notice">Tu nombre es solo un apodo. En la actividad de letras se muestra de forma anónima («Un jugador acertó…» / «Un jugador falló…»).</div>
+<div class="careerPanel" style="margin-top:16px"><h3>⚽ CARRERA FÚTBOL — modo original</h3><div style="color:var(--m);font-size:13px;line-height:1.45;margin-bottom:10px">Creá tu jugador, elegí posición y construí una carrera con partidos jugables a 60 FPS, preguntas, ofertas de clubes, goles, asistencias, temporadas y récords. No necesitás sala.</div><button id="openCareer" class="btn green">⚽ Abrir Carrera de Fútbol</button></div>
 </section>
 
 <section id="game" class="grid hidden">
 <main>
+<div id="roomBanner" class="roomBanner"><div>🔐 Código de invitación: <span id="roomMiniCode" class="roomMiniCode">--------</span></div><button id="copyBanner" class="btn gold">📋 Copiar</button></div>
 <div class="card board">
 <div class="top"><span class="pill">🎮 <b id="modeName">Ahorcado</b></span><span class="pill">🏆 Tus puntos: <b id="myScore">0</b></span></div>
 <div class="modebar"><button class="modebtn active" data-mode="hangman">☠️ Ahorcado</button><button class="modebtn" data-mode="pulse">⚡ Pulso</button><button class="modebtn" data-mode="memory">🧠 Memoria</button><button class="modebtn" data-mode="intruder">👀 Intruso</button></div>
@@ -91,8 +106,12 @@ input{width:100%;padding:12px 13px;color:var(--t);background:#090f19;border:1px 
 <div class="card chat"><h2 style="margin:0 0 10px">💬 Chat anónimo</h2><div id="messages" class="messages"></div><div class="chatbox"><input id="chat" maxlength="180" placeholder="Mensaje…"><button id="send" class="btn cyan">Enviar</button></div></div>
 </aside>
 </section>
+<section id="career" class="career hidden">
+<div class="careerTop"><div><div class="careerTitle">⚽ FÚTBOL — MODO CARRERA</div><div class="careerSub">Carrera original: posición, entrenamientos, partidos en tiempo real, preguntas y ofertas.</div></div><div class="row"><button id="careerNew" class="btn primary">✨ Nueva carrera</button><button id="careerBack" class="btn">↩ Volver</button></div></div>
+<div id="careerSetup" class="careerPanel"><h3>👤 Creá tu jugador</h3><div class="row"><div class="field"><input id="careerName" maxlength="18" placeholder="Nombre del jugador"></div><div class="field"><input id="careerNation" maxlength="18" placeholder="País"></div></div><div style="margin:10px 0 7px;color:var(--m);font-size:12px">Posición</div><div class="posRow"><button class="pos active" data-pos="POR">🧤 Arquero</button><button class="pos" data-pos="DEF">🛡️ Defensa</button><button class="pos" data-pos="MED">🎯 Mediocampista</button><button class="pos" data-pos="EXT">⚡ Extremo</button><button class="pos" data-pos="DEL">⚽ Delantero</button></div><button id="careerStart" class="btn green" style="margin-top:12px">🚀 Empezar desde inferiores</button></div>
+<div id="careerMain" class="hidden"><div class="careerGrid"><div><div class="footballStage"><canvas id="footballCanvas" width="960" height="540"></canvas><div class="footballHUD"><span class="fhud" id="fScore">⚽ 0</span><span class="fhud" id="fTime">⏱ 45.0</span><span class="fhud" id="fFps">60 FPS</span><span class="fhud" id="fHint">WASD / flechas · ESPACIO para rematar</span></div></div><div class="careerPanel"><h3>🎮 Partido interactivo</h3><div class="careerActions"><button id="matchStart" class="btn primary">▶ Jugar 60 segundos</button><button id="matchShoot" class="btn gold">⚽ Rematar</button><button id="matchPass" class="btn cyan">↗ Pase</button><button id="matchEnd" class="btn">⏹ Terminar</button></div><div class="notice">Arquero: mové al arquero con WASD. Resto: mové al jugador, acercate al área y rematá. La animación usa requestAnimationFrame.</div></div></div><div><div class="careerPanel"><h3 id="careerPlayerTitle">Jugador</h3><div class="careerStats"><div class="careerStat"><small>Edad</small><b id="csAge">17</b></div><div class="careerStat"><small>Club</small><b id="csClub">---</b></div><div class="careerStat"><small>OVR</small><b id="csOvr">60</b></div><div class="careerStat"><small>Goles</small><b id="csGoals">0</b></div><div class="careerStat"><small>Asist.</small><b id="csAssists">0</b></div><div class="careerStat"><small>Partidos</small><b id="csApps">0</b></div></div></div><div class="careerPanel"><h3>📈 Atributos</h3><div id="careerAttrs"></div></div><div class="careerPanel"><h3>🧠 Decisión de carrera</h3><div id="careerQuiz" class="quiz"></div></div><div class="careerPanel"><h3>💼 Ofertas</h3><div id="careerOffers" class="offerGrid"></div></div><div class="careerPanel"><h3>📜 Historia</h3><div id="careerLog" class="careerLog"></div><div class="careerActions" style="margin-top:10px"><button id="careerTrain" class="btn cyan">🏋️ Entrenar</button><button id="careerSeason" class="btn green">📅 Cerrar temporada</button><button id="careerOffersBtn" class="btn primary">💼 Buscar ofertas</button></div></div></div></div></div>
+</section>
 </div>
-
 <script>
 const WORD_SOURCES=[
  "https://raw.githubusercontent.com/olea/lemarios/master/lemario-general-del-espanol.txt",
@@ -203,7 +222,26 @@ function clientData(d){
  else if(d.type==="pingProbe")send(hostConn,{type:"pingPong",t:d.t});
 }
 async function getLocation(){if(!$("shareLocation").checked)return{};const c=new AbortController();setTimeout(()=>c.abort(),4500);try{const r=await fetch("https://ipapi.co/json/",{signal:c.signal});if(!r.ok)return{};const j=await r.json();return{city:String(j.city||"").slice(0,40),region:String(j.region||"").slice(0,40),country:String(j.country_name||"").slice(0,40)}}catch{return{}}}
-async function loadWords(){loadUsed();for(const url of WORD_SOURCES){try{const r=await fetch(url,{cache:"force-cache"});if(!r.ok)continue;const raw=await r.text(),a=[],seen=new Set();for(const line of raw.split(/\\r?\\n/)){const w=norm(line);if(w.length>=4&&w.length<=14&&/^[A-ZÑ]+$/.test(w)&&!seen.has(w)){seen.add(w);a.push(w)}}if(a.length>=1000){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}WORDS=a.slice(0,1000);$("startHang").disabled=false;$("startHang").textContent="▶ Iniciar 5 rondas";$("wordStatus")?.remove();return}}catch{}}WORDS=[...new Set(FALLBACK_WORDS.map(norm))];$("startHang").disabled=true;$("startHang").textContent="⛔ Banco de 1000 no disponible";addActivity("⚠️ No se pudo cargar el banco de 1000 palabras.")}
+async function loadWords(){
+ loadUsed();$("startHang").disabled=true;$("startHang").textContent="⏳ Cargando banco…";
+ for(const url of WORD_SOURCES){
+   try{
+     const r=await fetch(url,{cache:"no-store",mode:"cors"});if(!r.ok)continue;
+     const raw=await r.text(),a=[],seen=new Set();
+     for(const line of raw.split(/\r?\n/)){
+       const w=norm(line);
+       if(w.length>=4&&w.length<=14&&/^[A-ZÑ]+$/.test(w)&&!seen.has(w)){seen.add(w);a.push(w)}
+     }
+     if(a.length>=1000){
+       for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+       WORDS=a.slice(0,1000);$("startHang").disabled=false;$("startHang").textContent="▶ Iniciar 5 rondas";st("✅ Banco cargado: 1000 palabras.","good");return;
+     }
+   }catch(e){}
+ }
+ WORDS=[...new Set(FALLBACK_WORDS.map(norm).filter(w=>w.length>=4&&w.length<=14))];
+ $("startHang").disabled=WORDS.length<1000;$("startHang").textContent=WORDS.length>=1000?"▶ Iniciar 5 rondas":"⛔ Reintentá cargar el banco";
+ st(WORDS.length>=1000?"✅ Banco listo.":"⚠️ No respondió el banco externo. Recargá para reintentar.","bad");
+}
 function ensurePeer(){if(window.Peer)return Promise.resolve();if(peerLoader)return peerLoader;peerLoader=new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js";s.onload=()=>window.Peer?res():rej();s.onerror=rej;document.head.appendChild(s)});return peerLoader}
 function openPeer(id){return new Promise((res,rej)=>{try{peer=new Peer(id||undefined,{debug:0})}catch(e){rej(e);return}let done=false;const timer=setTimeout(()=>{if(done)return;done=true;try{peer?.destroy()}catch{};peer=null;rej(new Error("timeout"))},12000);peer.on("open",x=>{if(done)return;done=true;clearTimeout(timer);myId=x;connected=true;$("badge").textContent="🟢 Conectado";res(x)});peer.on("error",e=>{if(done)return;done=true;clearTimeout(timer);rej(e)});peer.on("disconnected",()=>{$("badge").textContent="🟡 Desconectado";try{peer.reconnect()}catch{}});peer.on("close",()=>{$("badge").textContent="⚪ Cerrado"})})}
 async function createRoom(){
@@ -219,7 +257,7 @@ async function createRoom(){
  }
  if(!ok){isHost=false;st("PeerJS no pudo abrir la sala. Recargá y probá otra vez.","bad");return}
  state={phase:"lobby",mode:"hangman",round:0,secret:"",players:[{id:myId,num:1,name:myName,location:{},ping:null}],scores:{[myId]:0},errors:{[myId]:0},masks:{},usedBy:{},winner:[],loser:[],activity:[],chat:[],mini:null,nextNum:2};
- $("lobby").classList.add("hidden");$("game").classList.remove("hidden");$("hostPanel").classList.remove("hidden");$("created").classList.remove("hidden");$("code").textContent=roomCode;st("✅ SALA CREADA — compartí el código.","good");sysLocal("Código: "+roomCode);startPing();loadWords();
+ $("lobby").classList.add("hidden");$("game").classList.remove("hidden");$("hostPanel").classList.remove("hidden");$("created").classList.remove("hidden");$("code").textContent=roomCode;$("roomMiniCode").textContent=roomCode;$("roomBanner").classList.remove("hidden");st("✅ SALA CREADA — compartí el código.","good");sysLocal("Código: "+roomCode);startPing();loadWords();
  getLocation().then(l=>{state.players[0].location=l;sync()});
  peer.on("connection",c=>{conns.set(c.peer,c);c.on("data",d=>hostData(c,d));c.on("close",()=>removePlayer(c.peer))});
  render(payload(myId));
@@ -234,7 +272,7 @@ function joinRoom(){
  ensurePeer().then(()=>openPeer()).then(()=>{
    hostConn=peer.connect("H"+roomCode,{reliable:true,serialization:"json"});
    joinTimer=setTimeout(()=>{if(!hostConn||!hostConn.open){try{peer?.destroy()}catch{};peer=null;hostConn=null;connected=false;st("No se encontró esa sala o no responde. Revisá el código.","bad")}},12000);
-   hostConn.on("open",()=>{connected=true;clearTimeout(joinTimer);send(hostConn,{type:"join",name:myName});$("lobby").classList.add("hidden");$("game").classList.remove("hidden");st("✅ Entraste a la sala.","good");getLocation().then(l=>send(hostConn,{type:"location",location:l}))});
+   hostConn.on("open",()=>{connected=true;clearTimeout(joinTimer);send(hostConn,{type:"join",name:myName});$("lobby").classList.add("hidden");$("game").classList.remove("hidden");$("roomMiniCode").textContent=roomCode;$("roomBanner").classList.remove("hidden");st("✅ Entraste a la sala.","good");getLocation().then(l=>send(hostConn,{type:"location",location:l}))});
    hostConn.on("data",clientData);
    hostConn.on("close",()=>{connected=false;st("El anfitrión cerró la sala.","bad")});
    hostConn.on("error",()=>{connected=false;st("Error de conexión con la sala.","bad")});
@@ -262,6 +300,112 @@ function sendMini(o){if(isHost)miniAction(myId,o);else send(hostConn,Object.assi
 function showResult(t){$("result").innerHTML=t;$("result").className="result";$("result").classList.remove("hidden")}
 function showFinal(s){const a=[...s.players].sort((x,y)=>(y.score||0)-(x.score||0));showResult("<b>🏆 RESULTADO FINAL</b>"+a.map((p,i)=>"<div style='padding:7px 0;border-bottom:1px solid #20293b'>"+(i+1)+". "+esc(label(p))+" — <b>"+(p.score||0)+"</b></div>").join(""))}
 function drawHangman(e){const c=$("canvas"),x=c.getContext("2d");x.clearRect(0,0,220,220);x.strokeStyle="#dfe6f5";x.lineWidth=5;x.lineCap="round";x.beginPath();x.moveTo(18,202);x.lineTo(202,202);x.moveTo(55,202);x.lineTo(55,25);x.lineTo(150,25);x.lineTo(150,50);x.stroke();if(e>=1){x.beginPath();x.arc(150,75,25,0,Math.PI*2);x.stroke()}if(e>=2){x.beginPath();x.moveTo(150,100);x.lineTo(150,150);x.stroke()}if(e>=3){x.beginPath();x.moveTo(150,112);x.lineTo(120,135);x.stroke()}if(e>=4){x.beginPath();x.moveTo(150,112);x.lineTo(180,135);x.stroke()}if(e>=5){x.beginPath();x.moveTo(150,150);x.lineTo(125,180);x.stroke()}if(e>=6){x.beginPath();x.moveTo(150,150);x.lineTo(175,180);x.stroke()}}
+
+let career=null,footballRAF=0,footballRunning=false,lastFrame=0,fpsAvg=60,matchTime=45,footballScore=0;
+const CLUBS=[
+ {n:"Atlético Puerto Sur",lvl:56},{n:"Deportivo Estrella",lvl:59},{n:"Real Bahía",lvl:62},{n:"Ferroviarios del Plata",lvl:64},
+ {n:"Unión Capital",lvl:67},{n:"Club Horizonte",lvl:70},{n:"Aurora FC",lvl:73},{n:"Titanes del Sur",lvl:76}
+];
+const QUIZ=[
+ ["¿Cuántos jugadores tiene un equipo en cancha al comenzar?","11",["9","10","11","12"]],
+ ["¿Qué posición usa guantes de forma habitual?","POR",["DEF","MED","POR","DEL"]],
+ ["¿Cómo se llama el torneo de clubes sudamericano?","Libertadores",["Libertadores","Eurocopa","Nations League","Super Bowl"]],
+ ["¿Qué estadística cuenta el pase previo a un gol?","Asistencia",["Asistencia","Atajada","Barrida","Offside"]]
+];
+const fb={p:{x:170,y:300},ball:{x:205,y:300,r:10,vx:0,vy:0},gk:{x:835,y:300},shots:0,saves:0};
+const keysDown={};
+function careerDefaults(){return {name:"",nation:"",pos:"POR",age:17,club:"Inferiores",season:1,apps:0,goals:0,assists:0,clean:0,titles:0,value:100000,rep:18,salary:150,history:["17 años — llega a las inferiores."],attrs:{ritmo:55,tiro:50,pase:52,defensa:58,fisico:56,reflejos:62},quizIndex:0,offers:[],lastOfferSeason:0};}
+function careerSave(){try{localStorage.setItem("nexon_carrera_futbol_v1",JSON.stringify(career));}catch{}}
+function careerLoad(){try{var x=JSON.parse(localStorage.getItem("nexon_carrera_futbol_v1")||"null");if(x&&x.name)career=x;}catch{}}
+function calcOvr(){var a=career.attrs;return Math.round((a.ritmo+a.tiro+a.pase+a.defensa+a.fisico+a.reflejos)/6);}
+function careerLog(t){career.history.unshift(t);career.history=career.history.slice(0,80);renderCareer();careerSave();}
+function careerStart(){
+ var name=(($("careerName").value||"").trim()||"Jugador").slice(0,18),nation=(($("careerNation").value||"").trim()||"Argentina").slice(0,18),pos=document.querySelector(".pos.active")?.dataset.pos||"POR";
+ career=careerDefaults();career.name=name;career.nation=nation;career.pos=pos;
+ if(pos==="POR"){career.attrs.reflejos=68;career.attrs.defensa=62;career.attrs.tiro=36;}
+ if(pos==="DEF"){career.attrs.defensa=68;career.attrs.fisico=63;career.attrs.tiro=42;}
+ if(pos==="MED"){career.attrs.pase=67;career.attrs.fisico=60;}
+ if(pos==="EXT"){career.attrs.ritmo=72;career.attrs.tiro=62;}
+ if(pos==="DEL"){career.attrs.ritmo=68;career.attrs.tiro=71;career.attrs.fisico=61;}
+ career.history=["17 años — "+name+" entra a las inferiores de "+CLUBS[0].n+"."];
+ $("careerSetup").classList.add("hidden");$("careerMain").classList.remove("hidden");renderCareer();careerSave();
+}
+function renderCareer(){
+ if(!career)return;
+ var role={POR:"Arquero",DEF:"Defensa",MED:"Mediocampista",EXT:"Extremo",DEL:"Delantero"}[career.pos]||career.pos;
+ $("careerPlayerTitle").textContent=career.name+" · "+role+" · "+career.nation;
+ $("csAge").textContent=career.age;$("csClub").textContent=career.club;$("csOvr").textContent=calcOvr();$("csGoals").textContent=career.goals;$("csAssists").textContent=career.assists;$("csApps").textContent=career.apps;
+ $("careerAttrs").innerHTML=Object.entries(career.attrs).map(function(e){return "<div style='margin:6px 0'><div style='display:flex;justify-content:space-between'><span>"+e[0].toUpperCase()+"</span><b>"+Math.round(e[1])+"</b></div><div style='height:7px;background:#182238;border-radius:7px;overflow:hidden'><div style='width:"+Math.max(0,Math.min(100,e[1]))+"%;height:100%;background:linear-gradient(90deg,#765cff,#10cbe8)'></div></div></div>";}).join("");
+ $("careerLog").innerHTML=career.history.map(function(x){return "<div>"+esc(x)+"</div>";}).join("");
+ renderQuiz();renderOffers();
+}
+function renderQuiz(){
+ var q=QUIZ[career.quizIndex%QUIZ.length],html="<div style='font-weight:800'>"+esc(q[0])+"</div>";
+ html+=q[2].map(function(a){return "<button data-answer='"+esc(a)+"'>"+esc(a)+"</button>";}).join("");
+ $("careerQuiz").innerHTML=html;$("careerQuiz").querySelectorAll("button").forEach(function(b){b.onclick=function(){answerQuiz(b.dataset.answer,q[1]);};});
+}
+function answerQuiz(ans,correct){
+ if(ans===correct){career.rep=Math.min(100,career.rep+3);career.attrs.pase=Math.min(95,career.attrs.pase+1);careerLog("🧠 Respuesta correcta: +3 reputación.");}
+ else {career.rep=Math.max(1,career.rep-1);careerLog("🧠 Respuesta incorrecta: la prensa pide más concentración.");}
+ career.quizIndex++;careerSave();renderCareer();
+}
+function generateOffers(){
+ if(!career)return;
+ var max=calcOvr(),pool=CLUBS.filter(function(x){return x.n!==career.club&&x.lvl<=max+8;}).sort(function(){return Math.random()-.5;}).slice(0,3);
+ career.offers=pool.map(function(x){return {club:x.n,level:x.lvl,salary:Math.round(220+x.lvl*13+Math.random()*180)};});career.lastOfferSeason=career.season;careerSave();renderOffers();
+}
+function renderOffers(){
+ if(!career.offers||!career.offers.length){$("careerOffers").innerHTML="<div style='color:var(--m);font-size:12px'>No hay ofertas nuevas. Jugá, entrená o avanzá la temporada.</div>";return;}
+ $("careerOffers").innerHTML=career.offers.map(function(o,i){return "<div class='offer'><strong>"+esc(o.club)+"</strong><span>OVR aprox. "+o.level+" · Sueldo $"+o.salary+"/mes</span><button class='btn green' data-offer='"+i+"'>Firmar</button></div>";}).join("");
+ $("careerOffers").querySelectorAll("button").forEach(function(b){b.onclick=function(){var o=career.offers[Number(b.dataset.offer)];if(!o)return;career.club=o.club;career.salary=o.salary;career.rep=Math.min(100,career.rep+5);career.offers=[];careerLog("✍️ Firma con "+o.club+".");};});
+}
+function careerTrain(){
+ var ks=career.pos==="POR"?["reflejos","defensa","fisico"]:career.pos==="DEF"?["defensa","fisico","pase"]:career.pos==="MED"?["pase","fisico","ritmo"]:career.pos==="EXT"?["ritmo","tiro","pase"]:["tiro","ritmo","fisico"];
+ ks.forEach(function(k){career.attrs[k]=Math.min(92,career.attrs[k]+1+Math.floor(Math.random()*2));});career.rep=Math.min(100,career.rep+1);careerLog("🏋️ Entrenamiento completado. +mejoras en "+ks.join(", ")+".");careerSave();renderCareer();
+}
+function careerSeason(){
+ var ovr=calcOvr(),app=22+Math.floor(Math.random()*16),g=0,a=0;
+ if(career.pos==="POR"){g=Math.random()<.05?1:0;a=Math.floor(Math.random()*4);}
+ else if(career.pos==="DEF"){g=Math.floor(Math.random()*5);a=2+Math.floor(Math.random()*7);}
+ else if(career.pos==="MED"){g=3+Math.floor(Math.random()*8);a=6+Math.floor(Math.random()*10);}
+ else if(career.pos==="EXT"){g=6+Math.floor(Math.random()*13);a=5+Math.floor(Math.random()*10);}
+ else {g=10+Math.floor(Math.random()*17);a=2+Math.floor(Math.random()*8);}
+ var mult=.7+ovr/150;g=Math.round(g*mult);a=Math.round(a*mult);career.apps+=app;career.goals+=g;career.assists+=a;career.age++;career.rep=Math.max(10,Math.min(100,career.rep+Math.round((ovr-60)/6)));career.value=100000+calcOvr()*calcOvr()*420+career.goals*18000;
+ if(g+a>=20&&Math.random()<.32){career.titles++;careerLog("🏆 Temporada "+career.season+": campeón · "+g+" goles · "+a+" asistencias.");}else careerLog("📅 Temporada "+career.season+": "+app+" partidos · "+g+" goles · "+a+" asistencias.");
+ career.season++;career.offers=[];generateOffers();careerSave();renderCareer();
+}
+function resetFootball(){fb.p.x=career.pos==="POR"?820:170;fb.p.y=300;fb.ball.x=fb.p.x+(career.pos==="POR"?-30:35);fb.ball.y=fb.p.y;fb.ball.vx=0;fb.ball.vy=0;fb.gk.x=835;fb.gk.y=300;fb.shots=0;fb.saves=0;footballScore=0;matchTime=60;}
+function footballStart(){if(!career)return;resetFootball();footballRunning=true;lastFrame=performance.now();if(footballRAF)cancelAnimationFrame(footballRAF);footballRAF=requestAnimationFrame(footballLoop);$("fHint").textContent="WASD / flechas · ESPACIO remate · P pase";}
+function footballShoot(){if(!career||!footballRunning)return;fb.shots++;if(career.pos==="POR"){fb.ball.x=860;fb.ball.y=100+Math.random()*400;fb.ball.vx=-500;fb.ball.vy=(300-fb.ball.y)*1.15;}else{var d=Math.hypot(fb.ball.x-fb.p.x,fb.ball.y-fb.p.y);if(d<105){var power=520+career.attrs.tiro*2;fb.ball.vx=power;fb.ball.vy=(300-fb.ball.y)*1.15;}else st("Acercate al balón para rematar.","bad");}}
+function footballPass(){if(!career||!footballRunning)return;career.assists++;career.attrs.pase=Math.min(95,career.attrs.pase+.2);renderCareer();careerSave();st("↗ Pase clave: +1 asistencia.","good");}
+function updateFootball(dt,W,H){
+ matchTime-=dt;var sp=250,dx=0,dy=0,k=career.attrs.ritmo/100;
+ if(keysDown["w"]||keysDown["arrowup"])dy--;if(keysDown["s"]||keysDown["arrowdown"])dy++;if(keysDown["a"]||keysDown["arrowleft"])dx--;if(keysDown["d"]||keysDown["arrowright"])dx++;
+ if(career.pos==="POR"&&dx<0)dx=0;
+ fb.p.x=Math.max(70,Math.min(865,fb.p.x+dx*sp*dt*(.7+k*.6)));fb.p.y=Math.max(70,Math.min(470,fb.p.y+dy*sp*dt*(.7+k*.6)));
+ if(career.pos!=="POR"&&Math.hypot(fb.ball.x-fb.p.x,fb.ball.y-fb.p.y)<52){fb.ball.x=fb.p.x+25;fb.ball.y=fb.p.y;}
+ if(career.pos==="POR")fb.gk.y=fb.p.y;else fb.gk.y+=((fb.ball.y-fb.gk.y)*Math.min(1,dt*3));
+ fb.gk.y=Math.max(180,Math.min(420,fb.gk.y));
+ fb.ball.x+=fb.ball.vx*dt;fb.ball.y+=fb.ball.vy*dt;fb.ball.vx*=Math.pow(.1,dt);fb.ball.vy*=Math.pow(.1,dt);
+ if(fb.ball.y<45||fb.ball.y>495){fb.ball.vy*=-.75;fb.ball.y=Math.max(45,Math.min(495,fb.ball.y));}
+ if(career.pos!=="POR"&&Math.hypot(fb.ball.x-fb.gk.x,fb.ball.y-fb.gk.y)<30){fb.ball.x=800;fb.ball.vx=-180;fb.saves++;}
+ if(fb.ball.x>910&&Math.abs(fb.ball.y-300)<92){footballScore++;fb.ball.x=205;fb.ball.y=300;fb.ball.vx=0;fb.ball.vy=0;fb.p.x=170;fb.p.y=300;}
+}
+function drawFootball(ctx,W,H){
+ ctx.clearRect(0,0,W,H);ctx.fillStyle="#0a6a3b";ctx.fillRect(0,0,W,H);ctx.strokeStyle="rgba(255,255,255,.78)";ctx.lineWidth=4;ctx.strokeRect(28,28,W-56,H-56);ctx.beginPath();ctx.moveTo(W/2,28);ctx.lineTo(W/2,H-28);ctx.stroke();ctx.beginPath();ctx.arc(W/2,H/2,82,0,Math.PI*2);ctx.stroke();ctx.strokeRect(28,180,150,240);ctx.strokeRect(W-178,180,150,240);ctx.strokeRect(28,235,65,130);ctx.strokeRect(W-93,235,65,130);
+ ctx.fillStyle="rgba(255,255,255,.13)";ctx.fillRect(902,205,36,190);
+ ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(fb.ball.x,fb.ball.y,fb.ball.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#111";ctx.lineWidth=2;ctx.stroke();
+ ctx.fillStyle=career.pos==="POR"?"#ffcc00":"#5eb0ff";ctx.beginPath();ctx.arc(fb.p.x,fb.p.y,17,0,Math.PI*2);ctx.fill();ctx.fillStyle="#fff";ctx.font="900 12px Arial";ctx.textAlign="center";ctx.fillText(career.pos,fb.p.x,fb.p.y+4);
+ ctx.fillStyle="#ff4d6d";ctx.beginPath();ctx.arc(fb.gk.x,fb.gk.y,18,0,Math.PI*2);ctx.fill();ctx.fillStyle="#fff";ctx.fillText("GK",fb.gk.x,fb.gk.y+4);
+ ctx.fillStyle="#111";ctx.beginPath();ctx.arc(fb.ball.x,fb.ball.y,7,0,Math.PI*2);ctx.fill();ctx.fillStyle="#fff";ctx.font="900 13px Arial";ctx.fillText("PUERTO SUR ARENA",W/2,21);
+}
+function footballLoop(ts){
+ if(!footballRunning)return;var dt=Math.min(.033,(ts-lastFrame||16.67)/1000);lastFrame=ts;var ctx=$("footballCanvas").getContext("2d");updateFootball(dt,960,540);drawFootball(ctx,960,540);fpsAvg=fpsAvg*.9+(1000/dt)*.1;$("fFps").textContent=Math.round(Math.min(60,fpsAvg))+" FPS";$("fTime").textContent="⏱ "+Math.max(0,matchTime).toFixed(1);$("fScore").textContent="⚽ "+footballScore;if(matchTime<=0){footballStop("⏱ Fin del partido.");return;}footballRAF=requestAnimationFrame(footballLoop);
+}
+function footballStop(msg){if(!career)return;footballRunning=false;if(footballRAF)cancelAnimationFrame(footballRAF);footballRAF=0;career.apps++;career.goals+=footballScore;career.rep=Math.min(100,career.rep+footballScore*2);careerLog("🏟️ Partido jugable: "+footballScore+" goles · "+fb.shots+" remates · "+fb.saves+" atajadas.");careerSave();renderCareer();st(msg||"Partido terminado.","good");}
+function openCareer(){$("lobby").classList.add("hidden");$("game").classList.add("hidden");$("career").classList.remove("hidden");careerLoad();if(career){$("careerSetup").classList.add("hidden");$("careerMain").classList.remove("hidden");renderCareer();}else{$("careerSetup").classList.remove("hidden");$("careerMain").classList.add("hidden");}}
+function careerBack(){footballRunning=false;if(footballRAF)cancelAnimationFrame(footballRAF);$("career").classList.add("hidden");$("lobby").classList.remove("hidden");}
+
 function bindUI(){
  $("create").onclick=createRoom;
  $("join").onclick=joinRoom;
@@ -275,6 +419,14 @@ function bindUI(){
  $("startPulse").onclick=startPulse;
  $("startMemory").onclick=startMemory;
  $("startIntruder").onclick=startIntruder;
+ $("copyBanner").onclick=async()=>{try{await navigator.clipboard.writeText(roomCode);st("✅ Código copiado.","good")}catch{st("Código: "+roomCode,"good")}};
+ $("openCareer").onclick=openCareer;$("careerBack").onclick=careerBack;
+ $("careerNew").onclick=function(){career=null;localStorage.removeItem("nexon_carrera_futbol_v1");$("careerMain").classList.add("hidden");$("careerSetup").classList.remove("hidden");};
+ $("careerStart").onclick=careerStart;$("matchStart").onclick=footballStart;$("matchShoot").onclick=footballShoot;$("matchPass").onclick=footballPass;$("matchEnd").onclick=function(){footballStop("⏹ Partido terminado.");};
+ $("careerTrain").onclick=careerTrain;$("careerSeason").onclick=careerSeason;$("careerOffersBtn").onclick=generateOffers;
+ document.querySelectorAll(".pos").forEach(b=>b.onclick=function(){document.querySelectorAll(".pos").forEach(x=>x.classList.remove("active"));b.classList.add("active");});
+ window.addEventListener("keydown",function(e){if(["INPUT","TEXTAREA","BUTTON"].includes(document.activeElement?.tagName))return;keysDown[e.key.toLowerCase()]=true;if(e.code==="Space"){e.preventDefault();footballShoot();}});
+ window.addEventListener("keyup",function(e){keysDown[e.key.toLowerCase()]=false;});
  document.querySelectorAll(".modebtn").forEach(b=>b.onclick=()=>setPanels(b.dataset.mode));
 }
 function guess(){const l=norm($("letter").value);if(!/^[A-ZÑ]$/.test(l))return;if(isHost)hostGuess(myId,l);else send(hostConn,{type:"guess",letter:l});$("letter").value=""}
