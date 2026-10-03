@@ -314,6 +314,7 @@ function showFinal(s){const a=[...s.players].sort((x,y)=>(y.score||0)-(x.score||
 function drawHangman(e){const c=$("canvas"),x=c.getContext("2d");x.clearRect(0,0,220,220);x.strokeStyle="#dfe6f5";x.lineWidth=5;x.lineCap="round";x.beginPath();x.moveTo(18,202);x.lineTo(202,202);x.moveTo(55,202);x.lineTo(55,25);x.lineTo(150,25);x.lineTo(150,50);x.stroke();if(e>=1){x.beginPath();x.arc(150,75,25,0,Math.PI*2);x.stroke()}if(e>=2){x.beginPath();x.moveTo(150,100);x.lineTo(150,150);x.stroke()}if(e>=3){x.beginPath();x.moveTo(150,112);x.lineTo(120,135);x.stroke()}if(e>=4){x.beginPath();x.moveTo(150,112);x.lineTo(180,135);x.stroke()}if(e>=5){x.beginPath();x.moveTo(150,150);x.lineTo(125,180);x.stroke()}if(e>=6){x.beginPath();x.moveTo(150,150);x.lineTo(175,180);x.stroke()}}
 
 
+const $c=id=>document.getElementById(id);
 let career=null,careerEvent=null,careerBusy=false;
 const CLUBS=[
  {n:"Atlético Puerto Sur",lvl:56,league:"Primera",style:"proyecto",wage:420},
