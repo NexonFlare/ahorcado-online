@@ -101,6 +101,7 @@ const TOTAL_ROUNDS=5,MAX_ERRORS=6,NEXT_DELAY=3500,LETTER_POINTS=15,ROUND_POINTS=
 const ABC="ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split(""),EMOJIS=["🍕","🚀","🐙","🎯","🔥","🌈","🐸","🍩","👽","⚡","🎮","🦄"];
 let WORDS=[],usedWords=[],peer=null,isHost=false,roomCode="",myId="",hostConn=null,peerLoader=null,joinTimer=null,pingTimer=null,locationTimer=null,connected=false;
 const conns=new Map();
+let lastClientState=null;
 let state={phase:"lobby",mode:"hangman",round:0,secret:"",players:[],scores:{},errors:{},masks:{},usedBy:{},winner:[],loser:[],activity:[],chat:[],mini:null,nextNum:1};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
@@ -125,7 +126,7 @@ function payload(id){
    if(state.mini.type==="memory"&&state.mini.stage==="show")mini.sequence=state.mini.sequence||[];
    if(state.mini.type==="intruder")mini.board=state.mini.board||[];
  }
- return {phase:state.phase,mode:state.mode,round:state.round,winner:state.winner,loser:state.loser,pool:Math.max(0,WORDS.length-usedWords.length),players:publicPlayers(),selfMask:state.masks[id]||"",selfUsed:state.usedBy[id]||[],selfErrors:state.errors[id]||0,mini,activity:state.activity.slice(-40),chat:state.chat.slice(-60)};
+ return {phase:state.phase,mode:state.mode,round:state.round,winner:state.winner,loser:state.loser,pool:Math.max(0,WORDS.length-usedWords.length),players:publicPlayers(),selfMask:state.masks[id]||"",selfUsed:state.usedBy[id]||[],selfErrors:state.errors[id]||0,mini};
 }
 function sync(){for(const [id,c] of conns.entries())send(c,{type:"state",state:payload(id)});render(payload(myId))}
 function allHangmanDone(){return state.players.length>0&&state.players.every(p=>(state.errors[p.id]||0)>=MAX_ERRORS||!(state.masks[p.id]||"").includes("_"))}
@@ -166,7 +167,7 @@ function miniAction(id,d){
  if(state.mini.type==="memory"&&d.type==="memoryAnswer"&&state.mini.stage==="answer"){
    const ans=Array.isArray(d.answer)?d.answer:[],good=ans.length===5&&ans.every((x,i)=>x===state.mini.secret[i]);
    if(good){state.mini.winner=label(p);state.mini.results[id]=true;state.scores[id]=(state.scores[id]||0)+150;state.mini.stage="result";state.phase="round_end";addActivity("🧠 "+label(p)+" recordó la secuencia (+150).");sync();setTimeout(()=>{state.phase="lobby";state.mini=null;sync()},NEXT_DELAY)}
-   else{state.mini.results[id]=false;addActivity("🧠 "+label(p)+" falló la secuencia.");send(conns.get(id),{type:"toast",message:"Secuencia incorrecta. Probá otra vez."});}
+   else{state.mini.results[id]=false;addActivity("🧠 "+label(p)+" falló la secuencia.");send(conns.get(id),{type:"toast",message:"Secuencia incorrecta. Probá otra vez."});send(conns.get(id),{type:"refresh"});}
    return;
  }
  if(state.mini.type==="intruder"&&d.type==="intruderPick"&&state.mini.stage==="play"){
@@ -188,10 +189,15 @@ function hostData(conn,d){
  if(d.type==="mini"){miniAction(conn.peer,d);return}
 }
 function clientData(d){
- if(d.type==="state")render(d.state);
- else if(d.type==="chat")lineChat(d.name,d.message);
+ if(d.type==="state"){lastClientState=d.state;render(d.state);}
+ else if(d.type==="history"){
+   renderActivity(d.activity||[]);
+   $("messages").innerHTML="";
+   (d.chat||[]).forEach(x=>lineChat(x.name,x.message));
+ }else if(d.type==="chat")lineChat(d.name,d.message);
  else if(d.type==="activity"){const a=document.getElementById("activity");const x=document.createElement("div");x.className="act";x.textContent=d.message;a.appendChild(x);a.scrollTop=a.scrollHeight}
  else if(d.type==="toast")st(d.message,"bad");
+ else if(d.type==="refresh"&&lastClientState)render(lastClientState);
  else if(d.type==="pingProbe")send(hostConn,{type:"pingPong",t:d.t});
 }
 async function getLocation(){if(!$("shareLocation").checked)return{};const c=new AbortController();setTimeout(()=>c.abort(),4500);try{const r=await fetch("https://ipapi.co/json/",{signal:c.signal});if(!r.ok)return{};const j=await r.json();return{city:String(j.city||"").slice(0,40),region:String(j.region||"").slice(0,40),country:String(j.country_name||"").slice(0,40)}}catch{return{}}}
