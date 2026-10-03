@@ -232,24 +232,28 @@ function clientData(d){
 }
 async function getLocation(){if(!$("shareLocation").checked)return{};const c=new AbortController();setTimeout(()=>c.abort(),4500);try{const r=await fetch("https://ipapi.co/json/",{signal:c.signal});if(!r.ok)return{};const j=await r.json();return{city:String(j.city||"").slice(0,40),region:String(j.region||"").slice(0,40),country:String(j.country_name||"").slice(0,40)}}catch{return{}}}
 async function loadWords(){
- loadUsed();$("startHang").disabled=true;$("startHang").textContent="⏳ Cargando banco…";
- for(const url of WORD_SOURCES){
-   try{
-     const r=await fetch(url,{cache:"no-store",mode:"cors"});if(!r.ok)continue;
-     const raw=await r.text(),a=[],seen=new Set();
-     for(const line of raw.split(/\r?\n/)){
-       const w=norm(line);
-       if(w.length>=4&&w.length<=14&&/^[A-ZÑ]+$/.test(w)&&!seen.has(w)){seen.add(w);a.push(w)}
-     }
-     if(a.length>=1000){
-       for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
-       WORDS=a.slice(0,1000);$("startHang").disabled=false;$("startHang").textContent="▶ Iniciar 5 rondas";st("✅ Banco cargado: 1000 palabras.","good");return;
-     }
-   }catch(e){}
+ loadUsed();
+ $("startHang").disabled=true;
+ $("startHang").textContent="⏳ Cargando banco de palabras…";
+ try{
+   const r=await fetch("words.txt?cb=201",{cache:"no-store"});
+   if(!r.ok)throw new Error("local words "+r.status);
+   const raw=await r.text(),a=[],seen=new Set();
+   for(const line of raw.split(/\r?\n/)){
+     const w=norm(line);
+     if(w.length>=4&&w.length<=14&&/^[A-ZÑ]+$/.test(w)&&!seen.has(w)){seen.add(w);a.push(w);}
+   }
+   if(a.length<1000)throw new Error("solo "+a.length);
+   WORDS=a.slice(0,1000);
+   $("startHang").disabled=false;
+   $("startHang").textContent="▶ Iniciar 5 rondas";
+   st("✅ Banco local cargado: 1000 palabras.","good");
+ }catch(e){
+   WORDS=[];
+   $("startHang").disabled=true;
+   $("startHang").textContent="⛔ Banco no disponible";
+   st("⚠️ No se pudo cargar el banco local de palabras.","bad");
  }
- WORDS=[...new Set(FALLBACK_WORDS.map(norm).filter(w=>w.length>=4&&w.length<=14))];
- $("startHang").disabled=WORDS.length<1000;$("startHang").textContent=WORDS.length>=1000?"▶ Iniciar 5 rondas":"⛔ Reintentá cargar el banco";
- st(WORDS.length>=1000?"✅ Banco listo.":"⚠️ No respondió el banco externo. Recargá para reintentar.","bad");
 }
 function ensurePeer(){if(window.Peer)return Promise.resolve();if(peerLoader)return peerLoader;peerLoader=new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js";s.onload=()=>window.Peer?res():rej();s.onerror=rej;document.head.appendChild(s)});return peerLoader}
 function openPeer(id){return new Promise((res,rej)=>{try{peer=new Peer(id||undefined,{debug:0})}catch(e){rej(e);return}let done=false;const timer=setTimeout(()=>{if(done)return;done=true;try{peer?.destroy()}catch{};peer=null;rej(new Error("timeout"))},12000);peer.on("open",x=>{if(done)return;done=true;clearTimeout(timer);myId=x;connected=true;$("badge").textContent="🟢 Conectado";res(x)});peer.on("error",e=>{if(done)return;done=true;clearTimeout(timer);rej(e)});peer.on("disconnected",()=>{$("badge").textContent="🟡 Desconectado";try{peer.reconnect()}catch{}});peer.on("close",()=>{$("badge").textContent="⚪ Cerrado"})})}
