@@ -101,7 +101,7 @@ const WORD_SOURCES=[
 const FALLBACK_WORDS="ABOGADO AEROPUERTO AMISTAD ANIMAL AVENTURA AZUL BARCO BOSQUE CABALLO CAMINO CAMARA CAMISETA CANCION CASTILLO CELULAR CIENCIA CIUDAD COLEGIO COMPUTADORA CONCIERTO CONEJO CORAZON COCINA CHOCOLATE DEPORTE EDIFICIO ESCUELA FAMILIA FANTASMA FARMACIA FIESTA FUEGO GUITARRA GATO GOBIERNO HELADO HISTORIA HOSPITAL INVIERNO JARDIN JUEGO JUGUETE LAGUNA LAMPARA LIBRO LUNA MADERA MERCADO MENSAJE MOCHILA MONEDA MONTANA MUSEO MUSICA NARANJA OFICINA PALABRA PARQUE PESCADO PELICULA PERRO PLANETA PUERTA PRINCESA PROBLEMA PROYECTO PUENTE QUESO RADIO REGALO RELOJ RESTAURANTE RIO ROBOT ROSA SALON SECRETO SEMANA SONRISA SORPRESA TABLERO TELEFONO TESORO TIENDA TORMENTA TRABAJO TREN UNIVERSO USUARIO VACACIONES VALLE VENTANA VERANO VIAJE VIENTO VICTORIA VOLCAN ZAPATO ZOOLOGICO".split(" ");
 const TOTAL_ROUNDS=5,MAX_ERRORS=6,NEXT_DELAY=3500,LETTER_POINTS=15,ROUND_POINTS=100;
 const ABC="ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split(""),EMOJIS=["🍕","🚀","🐙","🎯","🔥","🌈","🐸","🍩","👽","⚡","🎮","🦄"];
-let WORDS=[],usedWords=[],peer=null,isHost=false,roomCode="",myId="",hostConn=null,peerLoader=null,joinTimer=null,pingTimer=null,locationTimer=null,connected=false;
+let WORDS=[],usedWords=[],peer=null,isHost=false,roomCode="",myId="",myName="",hostConn=null,peerLoader=null,joinTimer=null,pingTimer=null,connected=false;
 const conns=new Map();
 let lastClientState=null;
 let state={phase:"lobby",mode:"hangman",round:0,secret:"",players:[],scores:{},errors:{},masks:{},usedBy:{},winner:[],loser:[],activity:[],chat:[],mini:null,nextNum:1};
@@ -109,7 +109,7 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
 const norm=s=>String(s||"").toUpperCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^A-ZÑ]/g,"");
 const st=(t,k="")=>{$("status").textContent=t;$("status").className="status "+k};
-const label=p=>"Jugador "+p.num;
+const label=p=>String(p?.name||("Jugador "+p?.num||"Jugador")).slice(0,16);
 const send=(c,o)=>{try{if(c&&c.open)c.send(o)}catch{}};
 const broadcast=o=>{for(const c of conns.values())send(c,o)};
 function saveUsed(){try{localStorage.setItem("ahorcado_used_words_final2",JSON.stringify(usedWords))}catch{}}
@@ -205,11 +205,19 @@ function clientData(d){
 async function getLocation(){if(!$("shareLocation").checked)return{};const c=new AbortController();setTimeout(()=>c.abort(),4500);try{const r=await fetch("https://ipapi.co/json/",{signal:c.signal});if(!r.ok)return{};const j=await r.json();return{city:String(j.city||"").slice(0,40),region:String(j.region||"").slice(0,40),country:String(j.country_name||"").slice(0,40)}}catch{return{}}}
 async function loadWords(){loadUsed();for(const url of WORD_SOURCES){try{const r=await fetch(url,{cache:"force-cache"});if(!r.ok)continue;const raw=await r.text(),a=[],seen=new Set();for(const line of raw.split(/\\r?\\n/)){const w=norm(line);if(w.length>=4&&w.length<=14&&/^[A-ZÑ]+$/.test(w)&&!seen.has(w)){seen.add(w);a.push(w)}}if(a.length>=1000){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}WORDS=a.slice(0,1000);$("startHang").disabled=false;$("startHang").textContent="▶ Iniciar 5 rondas";$("wordStatus")?.remove();return}}catch{}}WORDS=[...new Set(FALLBACK_WORDS.map(norm))];$("startHang").disabled=true;$("startHang").textContent="⛔ Banco de 1000 no disponible";addActivity("⚠️ No se pudo cargar el banco de 1000 palabras.")}
 function ensurePeer(){if(window.Peer)return Promise.resolve();if(peerLoader)return peerLoader;peerLoader=new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js";s.onload=()=>window.Peer?res():rej();s.onerror=rej;document.head.appendChild(s)});return peerLoader}
-function openPeer(id){return new Promise((res,rej)=>{peer=new Peer(id||undefined,{debug:0});let done=false;peer.on("open",x=>{if(done)return;done=true;myId=x;connected=true;$("badge").textContent="🟢 Conectado";res(x)});peer.on("error",e=>{if(done)return;done=true;rej(e)});peer.on("disconnected",()=>{$("badge").textContent="🟡 Desconectado";try{peer.reconnect()}catch{}});peer.on("close",()=>$("badge").textContent="⚪ Cerrado")})}
+function openPeer(id){return new Promise((res,rej)=>{try{peer=new Peer(id||undefined,{debug:0})}catch(e){rej(e);return}let done=false;const timer=setTimeout(()=>{if(done)return;done=true;try{peer?.destroy()}catch{};peer=null;rej(new Error("timeout"))},12000);peer.on("open",x=>{if(done)return;done=true;clearTimeout(timer);myId=x;connected=true;$("badge").textContent="🟢 Conectado";res(x)});peer.on("error",e=>{if(done)return;done=true;clearTimeout(timer);rej(e)});peer.on("disconnected",()=>{$("badge").textContent="🟡 Desconectado";try{peer.reconnect()}catch{}});peer.on("close",()=>{$("badge").textContent="⚪ Cerrado"})})}
 async function createRoom(){
- if(peer)return;isHost=true;st("Creando sala…");try{await ensurePeer()}catch{isHost=false;st("No se pudo cargar el multijugador.","bad");return}
- let ok=false;for(let i=0;i<8&&!ok;i++){roomCode=newCode();try{await openPeer("H"+roomCode);ok=true}catch{try{peer?.destroy()}catch{}peer=null}}
- if(!ok){isHost=false;st("No se pudo crear la sala. Probá otra vez.","bad");return}
+ if(peer){st("Ya estás conectado. Recargá la página para crear otra sala.","bad");return}
+ myName=(($("name")?.value||"").trim()||"Jugador").slice(0,16);
+ isHost=true;connected=false;st("Creando sala…");
+ try{await ensurePeer()}catch{isHost=false;st("No se pudo cargar el multijugador. Revisá que GitHub Pages permita Internet.","bad");return}
+ let ok=false;
+ for(let i=0;i<12&&!ok;i++){
+   roomCode=newCode();
+   try{await openPeer("H"+roomCode);ok=true}
+   catch(e){try{peer?.destroy()}catch{};peer=null;connected=false}
+ }
+ if(!ok){isHost=false;st("PeerJS no pudo abrir la sala. Recargá y probá otra vez.","bad");return}
  state={phase:"lobby",mode:"hangman",round:0,secret:"",players:[{id:myId,num:1,name:myName,location:{},ping:null}],scores:{[myId]:0},errors:{[myId]:0},masks:{},usedBy:{},winner:[],loser:[],activity:[],chat:[],mini:null,nextNum:2};
  $("lobby").classList.add("hidden");$("game").classList.remove("hidden");$("hostPanel").classList.remove("hidden");$("created").classList.remove("hidden");$("code").textContent=roomCode;st("✅ SALA CREADA — compartí el código.","good");sysLocal("Código: "+roomCode);startPing();loadWords();
  getLocation().then(l=>{state.players[0].location=l;sync()});
@@ -218,16 +226,24 @@ async function createRoom(){
 }
 function sysLocal(t){const d=document.createElement("div");d.className="msg small";d.textContent="• "+t;$("messages").appendChild(d)}
 function joinRoom(){
- if(peer)return;myName=(($("name").value.trim()||"Jugador")).slice(0,16);roomCode=$("room").value.trim().toUpperCase();if(!/^[A-Z0-9]{8}$/.test(roomCode)){st("El código debe tener 8 caracteres.","bad");return}
- st("Conectando…");ensurePeer().then(()=>openPeer()).then(()=>{host=false;hostConn=peer.connect("H"+roomCode,{reliable:true});joinTimer=setTimeout(()=>{if(!connected){peer?.destroy();peer=null;st("No se encontró esa sala. Revisá el código.","bad")}},12000);
- hostConn.on("open",()=>{connected=true;clearTimeout(joinTimer);send(hostConn,{type:"join",name:myName});$("lobby").classList.add("hidden");$("game").classList.remove("hidden");st("✅ Entraste a la sala.","good");getLocation().then(l=>send(hostConn,{type:"location",location:l}))});
- hostConn.on("data",clientData);hostConn.on("close",()=>st("El anfitrión cerró la sala.","bad"));hostConn.on("error",()=>st("Error de conexión.","bad"));
- }).catch(()=>{peer?.destroy();peer=null;st("No se pudo iniciar el multijugador. Revisá Internet.","bad")})
+ if(peer){st("Ya estás conectado. Recargá la página para unirte a otra sala.","bad");return}
+ myName=(($("name")?.value||"").trim()||"Jugador").slice(0,16);
+ roomCode=(($("room")?.value||"").trim()).toUpperCase();
+ if(!/^[A-Z0-9]{8}$/.test(roomCode)){st("El código debe tener 8 caracteres.","bad");return}
+ isHost=false;connected=false;st("Conectando a la sala…");
+ ensurePeer().then(()=>openPeer()).then(()=>{
+   hostConn=peer.connect("H"+roomCode,{reliable:true,serialization:"json"});
+   joinTimer=setTimeout(()=>{if(!hostConn||!hostConn.open){try{peer?.destroy()}catch{};peer=null;hostConn=null;connected=false;st("No se encontró esa sala o no responde. Revisá el código.","bad")}},12000);
+   hostConn.on("open",()=>{connected=true;clearTimeout(joinTimer);send(hostConn,{type:"join",name:myName});$("lobby").classList.add("hidden");$("game").classList.remove("hidden");st("✅ Entraste a la sala.","good");getLocation().then(l=>send(hostConn,{type:"location",location:l}))});
+   hostConn.on("data",clientData);
+   hostConn.on("close",()=>{connected=false;st("El anfitrión cerró la sala.","bad")});
+   hostConn.on("error",()=>{connected=false;st("Error de conexión con la sala.","bad")});
+ }).catch(e=>{try{peer?.destroy()}catch{};peer=null;connected=false;st("No se pudo iniciar el multijugador. "+(e?.type||"revisá Internet"),"bad")})
 }
 function startPing(){clearInterval(pingTimer);pingTimer=setInterval(()=>{const t=Date.now();for(const c of conns.values())send(c,{type:"pingProbe",t})},2500)}
 function setPanels(mode){$("modeName").textContent=mode==="hangman"?"Ahorcado":mode==="pulse"?"Pulso Relámpago":mode==="memory"?"Memoria Glitch":"Caza del Intruso";$("hangPanel").classList.toggle("hidden",mode!=="hangman");$("pulsePanel").classList.toggle("hidden",mode!=="pulse");$("memoryPanel").classList.toggle("hidden",mode!=="memory");$("intruderPanel").classList.toggle("hidden",mode!=="intruder");document.querySelectorAll(".modebtn").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode))}
 function render(s){
- setPanels(s.mode||"hangman");$("roundNo").textContent=s.round||0;$("pool").textContent=s.pool??1000;$("word").textContent=(s.selfMask||"—").split("").join(" ");$("errors").textContent=s.selfErrors||0;$("used").textContent=s.selfUsed?.length?s.selfUsed.join(" · "):"—";
+ setPanels(s.mode||"hangman");$("word").textContent=(s.selfMask||"—").split("").join(" ");$("errors").textContent=s.selfErrors||0;$("used").textContent=s.selfUsed?.length?s.selfUsed.join(" · "):"—";
  const me=s.players.find(p=>p.id===myId);$("myScore").textContent=me?.score||0;
  $("players").innerHTML="";[...s.players].sort((a,b)=>(b.score||0)-(a.score||0)).forEach(p=>{const d=document.createElement("div");d.className="player"+(p.id===myId?" me":"");const ping=p.id===myId&&isHost?"LOCAL":p.ping==null?"…":p.ping+" ms";const pc=p.ping==null?"":p.ping<=70?"pg":p.ping<=150?"pm":"pb";const loc=p.location&&(p.location.city||p.location.region||p.location.country)?[p.location.city,p.location.region,p.location.country].filter(Boolean).join(", "):"No compartida";d.innerHTML="<div class='pmain'><div class='pname'>"+esc(label(p))+(p.id===myId?" (vos)":"")+"</div><div class='stats'><span class='"+pc+"'>📶 "+esc(ping)+"</span><span>☠️ "+(p.errors||0)+"/6</span><span class='loc'>📍 "+esc(loc)+"</span></div></div><span class='score'>"+(p.score||0)+"</span>";$("players").appendChild(d)});
  renderActivity(s.activity||[]);
@@ -246,6 +262,26 @@ function sendMini(o){if(isHost)miniAction(myId,o);else send(hostConn,Object.assi
 function showResult(t){$("result").innerHTML=t;$("result").className="result";$("result").classList.remove("hidden")}
 function showFinal(s){const a=[...s.players].sort((x,y)=>(y.score||0)-(x.score||0));showResult("<b>🏆 RESULTADO FINAL</b>"+a.map((p,i)=>"<div style='padding:7px 0;border-bottom:1px solid #20293b'>"+(i+1)+". "+esc(label(p))+" — <b>"+(p.score||0)+"</b></div>").join(""))}
 function drawHangman(e){const c=$("canvas"),x=c.getContext("2d");x.clearRect(0,0,220,220);x.strokeStyle="#dfe6f5";x.lineWidth=5;x.lineCap="round";x.beginPath();x.moveTo(18,202);x.lineTo(202,202);x.moveTo(55,202);x.lineTo(55,25);x.lineTo(150,25);x.lineTo(150,50);x.stroke();if(e>=1){x.beginPath();x.arc(150,75,25,0,Math.PI*2);x.stroke()}if(e>=2){x.beginPath();x.moveTo(150,100);x.lineTo(150,150);x.stroke()}if(e>=3){x.beginPath();x.moveTo(150,112);x.lineTo(120,135);x.stroke()}if(e>=4){x.beginPath();x.moveTo(150,112);x.lineTo(180,135);x.stroke()}if(e>=5){x.beginPath();x.moveTo(150,150);x.lineTo(125,180);x.stroke()}if(e>=6){x.beginPath();x.moveTo(150,150);x.lineTo(175,180);x.stroke()}}
-loadUsed();render({phase:"lobby",mode:"hangman",round:0,selfMask:"",selfUsed:[],selfErrors:0,players:[],pool:1000,activity:[],chat:[]});
+function bindUI(){
+ $("create").onclick=createRoom;
+ $("join").onclick=joinRoom;
+ $("copy").onclick=async()=>{try{await navigator.clipboard.writeText(roomCode);st("✅ Código copiado.","good")}catch{st("Código: "+roomCode,"good")}};
+ $("letter").addEventListener("input",()=>{$("letter").value=$("letter").value.toUpperCase().slice(0,1)});
+ $("letter").addEventListener("keydown",e=>{if(e.key==="Enter")guess()});
+ $("guess").onclick=guess;
+ $("send").onclick=sendChat;
+ $("chat").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat()});
+ $("startHang").onclick=startHangman;
+ $("startPulse").onclick=startPulse;
+ $("startMemory").onclick=startMemory;
+ $("startIntruder").onclick=startIntruder;
+ document.querySelectorAll(".modebtn").forEach(b=>b.onclick=()=>setPanels(b.dataset.mode));
+}
+function guess(){const l=norm($("letter").value);if(!/^[A-ZÑ]$/.test(l))return;if(isHost)hostGuess(myId,l);else send(hostConn,{type:"guess",letter:l});$("letter").value=""}
+function sendChat(){const t=(($("chat").value||"").trim());if(!t)return;if(isHost)addChat(label(state.players.find(p=>p.id===myId)),t);else send(hostConn,{type:"chat",message:t});$("chat").value=""}
+function newCode(){return Math.random().toString(36).slice(2,10).toUpperCase().replace(/[^A-Z0-9]/g,"A").padEnd(8,"A").slice(0,8)}
+bindUI();
+loadUsed();
+render({phase:"lobby",mode:"hangman",round:0,selfMask:"",selfUsed:[],selfErrors:0,players:[],pool:1000,activity:[],chat:[]});
 </script>
 </body></html>
